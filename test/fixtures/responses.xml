@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sample Namecheap API responses for testing -->
+
+<!-- domains.getList success response -->
+<DomainsListSuccess>
+  <ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+    <Errors />
+    <Warnings />
+    <RequestedCommand>namecheap.domains.getList</RequestedCommand>
+    <CommandResponse Type="namecheap.domains.getList">
+      <DomainGetListResult>
+        <Domain ID="12345" Name="example.com" User="testuser" Created="01/01/2020" Expires="01/01/2025" IsExpired="false" IsLocked="false" AutoRenew="false" WhoisGuard="ENABLED" IsPremium="false" IsOurDNS="true"/>
+      </DomainGetListResult>
+      <Paging>
+        <TotalItems>1</TotalItems>
+        <CurrentPage>1</CurrentPage>
+        <PageSize>20</PageSize>
+      </Paging>
+    </CommandResponse>
+    <Server>WEB1</Server>
+    <GMTTimeDifference>--5:00</GMTTimeDifference>
+    <ExecutionTime>0.234</ExecutionTime>
+  </ApiResponse>
+</DomainsListSuccess>
+
+<!-- domains.dns.getList success response -->
+<DnsListSuccess>
+  <ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+    <Errors />
+    <Warnings />
+    <RequestedCommand>namecheap.domains.dns.getList</RequestedCommand>
+    <CommandResponse Type="namecheap.domains.dns.getList">
+      <DomainDNSGetListResult Domain="example.com" IsUsingOurDNS="true">
+        <Nameserver>dns1.registrar-servers.com</Nameserver>
+        <Nameserver>dns2.registrar-servers.com</Nameserver>
+      </DomainDNSGetListResult>
+    </CommandResponse>
+    <Server>WEB1</Server>
+    <GMTTimeDifference>--5:00</GMTTimeDifference>
+    <ExecutionTime>0.156</ExecutionTime>
+  </ApiResponse>
+</DnsListSuccess>
