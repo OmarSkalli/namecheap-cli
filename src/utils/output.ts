@@ -1,6 +1,6 @@
 import Table from 'cli-table3';
 import chalk from 'chalk';
-import { Domain, DnsListResponse, DnsHostsResponse } from '../api/types';
+import { Domain, DnsListResponse, DnsHostsResponse, DomainCheckResult } from '../api/types';
 import { Renderer, RenderFormat } from './renderer';
 
 export type OutputFormat = 'table' | 'json';
@@ -123,5 +123,41 @@ export class OutputFormatter {
 
   static formatSuccess(message: string): string {
     return chalk.green(message);
+  }
+
+  static formatDomainCheck(domains: DomainCheckResult[], format: OutputFormat = 'table'): string {
+    if (format === 'json') {
+      return JSON.stringify(domains, null, 2);
+    }
+
+    if (domains.length === 0) {
+      return chalk.yellow('No domains checked.');
+    }
+
+    const table = new Table({
+      head: [
+        chalk.cyan('Domain'),
+        chalk.cyan('Available'),
+        chalk.cyan('Premium'),
+        chalk.cyan('Reg. Price'),
+      ],
+    });
+
+    for (const domain of domains) {
+      const available = domain.available ? chalk.green('Yes') : chalk.red('No');
+      const premium = domain.isPremiumName ? chalk.yellow('Yes') : chalk.dim('No');
+      const price = domain.isPremiumName && domain.premiumRegistrationPrice
+        ? chalk.yellow(`$${domain.premiumRegistrationPrice}`)
+        : chalk.dim('-');
+
+      table.push([
+        domain.domain,
+        available,
+        premium,
+        price,
+      ]);
+    }
+
+    return table.toString();
   }
 }

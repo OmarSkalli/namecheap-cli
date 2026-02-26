@@ -1,6 +1,6 @@
 import * as https from 'https';
 import { URL } from 'url';
-import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse, DnsHostsResponse, DnsSetDefaultResponse } from './types';
+import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse, DnsHostsResponse, DnsSetDefaultResponse, DomainCheckResponse } from './types';
 import { ResponseParser } from './parser';
 
 const ENDPOINTS = {
@@ -130,5 +130,15 @@ export class NamecheapClient {
 
     const xml = await this.makeRequest(url);
     return ResponseParser.parseDnsSetDefaultResponse(xml);
+  }
+
+  async checkDomains(domains: string[]): Promise<ApiResponse<DomainCheckResponse>> {
+    const url = this.buildUrl({
+      command: 'namecheap.domains.check',
+      DomainList: domains.join(','),
+    });
+
+    const xml = await this.makeRequest(url);
+    return ResponseParser.parseDomainCheckResponse(xml);
   }
 }

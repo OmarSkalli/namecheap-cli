@@ -62,6 +62,22 @@ export interface DnsSetDefaultResponse {
   isSuccess: boolean;
 }
 
+export interface DomainCheckResult {
+  domain: string;
+  available: boolean;
+  isPremiumName?: boolean;
+  premiumRegistrationPrice?: string;
+  premiumRenewalPrice?: string;
+  premiumRestorePrice?: string;
+  premiumTransferPrice?: string;
+  icannFee?: string;
+  eapFee?: string;
+}
+
+export interface DomainCheckResponse {
+  domains: DomainCheckResult[];
+}
+
 export interface ApiRequestParams {
   command: string;
   [key: string]: string | number | boolean;

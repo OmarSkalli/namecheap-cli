@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import { initCommand } from './commands/init';
-import { domainsListCommand } from './commands/domains';
+import { domainsListCommand, domainCheckCommand } from './commands/domains';
 import { dnsListCommand, dnsRecordsCommand, dnsSetDefaultsCommand } from './commands/dns';
 
 const program = new Command();
@@ -27,6 +27,13 @@ domainsCommand
   .option('-o, --output <format>', 'Output format (table|json)', 'table')
   .option('--sandbox', 'Use sandbox environment')
   .action(domainsListCommand);
+
+domainsCommand
+  .command('check <domains...>')
+  .description('Check availability of one or more domains')
+  .option('-o, --output <format>', 'Output format (table|json)', 'table')
+  .option('--sandbox', 'Use sandbox environment')
+  .action(domainCheckCommand);
 
 const dnsCommand = program
   .command('dns')

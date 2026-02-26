@@ -6,6 +6,8 @@ import {
   DnsListResponse,
   DnsHostsResponse,
   DnsSetDefaultResponse,
+  DomainCheckResponse,
+  DomainCheckResult,
   HostRecord,
 } from './types';
 
@@ -190,6 +192,50 @@ export class ResponseParser {
       data: {
         domain: result['@_Domain'],
         isSuccess: result['@_IsSuccess'] === 'true',
+      },
+      executionTime: apiResponse.ExecutionTime,
+      server: apiResponse.Server,
+    };
+  }
+
+  static parseDomainCheckResponse(xml: string): ApiResponse<DomainCheckResponse> {
+    const parsed = this.parseXml(xml);
+    const apiResponse = parsed.ApiResponse;
+    const errors = this.extractErrors(parsed);
+
+    if (errors.length > 0) {
+      return {
+        status: 'ERROR',
+        errors,
+      };
+    }
+
+    const commandResponse = apiResponse.CommandResponse;
+    const result = commandResponse.DomainCheckResult;
+
+    const domains: DomainCheckResult[] = [];
+    if (result) {
+      const domainData = Array.isArray(result) ? result : [result];
+
+      for (const d of domainData) {
+        domains.push({
+          domain: d['@_Domain'],
+          available: d['@_Available'] === 'true',
+          isPremiumName: d['@_IsPremiumName'] === 'true',
+          premiumRegistrationPrice: d['@_PremiumRegistrationPrice'],
+          premiumRenewalPrice: d['@_PremiumRenewalPrice'],
+          premiumRestorePrice: d['@_PremiumRestorePrice'],
+          premiumTransferPrice: d['@_PremiumTransferPrice'],
+          icannFee: d['@_IcannFee'],
+          eapFee: d['@_EapFee'],
+        });
+      }
+    }
+
+    return {
+      status: 'OK',
+      data: {
+        domains,
       },
       executionTime: apiResponse.ExecutionTime,
       server: apiResponse.Server,

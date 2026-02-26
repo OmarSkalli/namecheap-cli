@@ -242,4 +242,112 @@ describe('ResponseParser', () => {
       expect(result.errors).toContain('Domain not found');
     });
   });
+
+  describe('parseDomainCheckResponse', () => {
+    it('should parse successful response with regular domain', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse xmlns="http://api.namecheap.com/xml.response" Status="OK">
+  <Errors/>
+  <Warnings/>
+  <RequestedCommand>namecheap.domains.check</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.check">
+    <DomainCheckResult Domain="testapi.xyz" Available="false" ErrorNo="0" Description="" IsPremiumName="false" PremiumRegistrationPrice="0" PremiumRenewalPrice="0" PremiumRestorePrice="0" PremiumTransferPrice="0" IcannFee="0" EapFee="0"/>
+  </CommandResponse>
+  <Server>PHX01APIEXT02</Server>
+  <GMTTimeDifference>--4:00</GMTTimeDifference>
+  <ExecutionTime>1.358</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDomainCheckResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domains).toHaveLength(1);
+      expect(result.data?.domains[0]).toEqual({
+        domain: 'testapi.xyz',
+        available: false,
+        isPremiumName: false,
+        premiumRegistrationPrice: '0',
+        premiumRenewalPrice: '0',
+        premiumRestorePrice: '0',
+        premiumTransferPrice: '0',
+        icannFee: '0',
+        eapFee: '0',
+      });
+    });
+
+    it('should parse successful response with premium domain', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse xmlns="http://api.namecheap.com/xml.response" Status="OK">
+  <Errors/>
+  <Warnings/>
+  <RequestedCommand>namecheap.domains.check</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.check">
+    <DomainCheckResult Domain="us.xyz" Available="true" ErrorNo="0" Description="" IsPremiumName="true" PremiumRegistrationPrice="13000.0000" PremiumRenewalPrice="13000.0000" PremiumRestorePrice="65.0000" PremiumTransferPrice="13000.0000" IcannFee="0.0000" EapFee="0.0000"/>
+  </CommandResponse>
+  <Server>PHX01APIEXT01</Server>
+  <GMTTimeDifference>--4:00</GMTTimeDifference>
+  <ExecutionTime>2.647</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDomainCheckResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domains).toHaveLength(1);
+      expect(result.data?.domains[0]).toEqual({
+        domain: 'us.xyz',
+        available: true,
+        isPremiumName: true,
+        premiumRegistrationPrice: '13000.0000',
+        premiumRenewalPrice: '13000.0000',
+        premiumRestorePrice: '65.0000',
+        premiumTransferPrice: '13000.0000',
+        icannFee: '0.0000',
+        eapFee: '0.0000',
+      });
+    });
+
+    it('should parse multiple domains', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse xmlns="http://api.namecheap.com/xml.response" Status="OK">
+  <Errors/>
+  <Warnings/>
+  <RequestedCommand>namecheap.domains.check</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.check">
+    <DomainCheckResult Domain="example.com" Available="false" ErrorNo="0" Description="" IsPremiumName="false" PremiumRegistrationPrice="0" PremiumRenewalPrice="0" PremiumRestorePrice="0" PremiumTransferPrice="0" IcannFee="0" EapFee="0"/>
+    <DomainCheckResult Domain="available-domain.xyz" Available="true" ErrorNo="0" Description="" IsPremiumName="false" PremiumRegistrationPrice="0" PremiumRenewalPrice="0" PremiumRestorePrice="0" PremiumTransferPrice="0" IcannFee="0" EapFee="0"/>
+  </CommandResponse>
+  <Server>PHX01APIEXT01</Server>
+  <GMTTimeDifference>--4:00</GMTTimeDifference>
+  <ExecutionTime>1.234</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDomainCheckResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domains).toHaveLength(2);
+      expect(result.data?.domains[0].domain).toBe('example.com');
+      expect(result.data?.domains[0].available).toBe(false);
+      expect(result.data?.domains[1].domain).toBe('available-domain.xyz');
+      expect(result.data?.domains[1].available).toBe(true);
+    });
+
+    it('should parse error response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="2011169">Only 50 domains are allowed in a single check command</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.check</RequestedCommand>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.078</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDomainCheckResponse(xml);
+
+      expect(result.status).toBe('ERROR');
+      expect(result.errors).toContain('Only 50 domains are allowed in a single check command');
+    });
+  });
 });
