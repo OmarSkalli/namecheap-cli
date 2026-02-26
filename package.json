@@ -1,5 +1,5 @@
 {
-  "name": "namecheap-cli",
+  "name": "@omarskalli/namecheap-cli",
   "version": "0.1.0",
   "description": "A CLI tool for managing Namecheap domains and DNS",
   "main": "dist/index.js",
@@ -19,8 +19,16 @@
     "domains",
     "dns"
   ],
-  "author": "",
+  "author": "Omar Skalli",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omarskalli/namecheap-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/omarskalli/namecheap-cli/issues"
+  },
+  "homepage": "https://github.com/omarskalli/namecheap-cli#readme",
   "dependencies": {
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.3",

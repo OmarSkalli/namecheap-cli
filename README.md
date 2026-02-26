@@ -25,18 +25,20 @@ A command-line interface tool for managing your Namecheap domains and DNS settin
 
 ## Installation
 
+### Global Installation (Recommended)
+
+```bash
+npm install -g @omarskalli/namecheap-cli
+```
+
 ### From Source
 
 ```bash
+git clone https://github.com/omarskalli/namecheap-cli.git
+cd namecheap-cli
 npm install
 npm run build
 npm link
-```
-
-### Global Installation (after publishing)
-
-```bash
-npm install -g namecheap-cli
 ```
 
 ## Prerequisites
