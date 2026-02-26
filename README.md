@@ -4,11 +4,24 @@ A command-line interface tool for managing your Namecheap domains and DNS settin
 
 ## Features
 
-- List all domains in your Namecheap account
-- View DNS nameservers for specific domains
+- Manage domains and DNS settings via Namecheap API
 - Support for both production and sandbox environments
+- Interactive confirmations for destructive operations
 - Multiple output formats (table and JSON)
 - Secure credential storage
+
+## Supported Commands
+
+### Domain Management
+- **`domains list`** - List all domains in your account
+
+### DNS Management
+- **`dns list <domain>`** - View DNS nameservers for a domain
+- **`dns records <domain>`** - List DNS host records (A, CNAME, MX, etc.)
+- **`dns set-defaults <domain>`** - Set domain to use Namecheap's default nameservers
+
+### Configuration
+- **`init`** - Initialize CLI with your API credentials
 
 ## Installation
 
@@ -115,6 +128,63 @@ namecheap dns list example.com --output json
 namecheap dns list example.com --sandbox
 ```
 
+### List DNS Host Records
+
+Get all DNS host records for a domain (A, CNAME, MX, etc.):
+
+```bash
+namecheap dns records <domain>
+```
+
+Options:
+- `-o, --output <format>`: Output format (`table` or `json`), default: `table`
+- `--table`: Display records in table format (default shows raw format)
+- `--sandbox`: Use sandbox environment instead of production
+
+Examples:
+
+```bash
+# Get DNS records for a domain
+namecheap dns records example.com
+
+# Get DNS records in table format
+namecheap dns records example.com --table
+
+# Get DNS records in JSON format
+namecheap dns records example.com --output json
+```
+
+### Set DNS to Namecheap Defaults
+
+Change a domain's nameservers to Namecheap's default DNS servers:
+
+```bash
+namecheap dns set-defaults <domain>
+```
+
+This command:
+- Checks if domain is already using default nameservers
+- Shows current nameservers before making changes
+- Requires typing the domain name to confirm
+- Only proceeds if confirmation matches
+
+Options:
+- `--sandbox`: Use sandbox environment instead of production
+
+Examples:
+
+```bash
+# Set domain to use Namecheap's default nameservers
+namecheap dns set-defaults example.com
+
+# Test against sandbox
+namecheap dns set-defaults example.com --sandbox
+```
+
+**Note:** This will replace any custom nameservers with Namecheap's defaults:
+- `dns1.registrar-servers.com`
+- `dns2.registrar-servers.com`
+
 ## Development
 
 ### Install Dependencies
@@ -176,6 +246,8 @@ To use the sandbox:
 # Test commands against sandbox
 namecheap domains list --sandbox
 namecheap dns list example.com --sandbox
+namecheap dns records example.com --sandbox
+namecheap dns set-defaults example.com --sandbox
 ```
 
 **Note:** The sandbox has **separate data** from production - your real domains won't appear in sandbox, and test domains in sandbox won't affect production.
@@ -184,6 +256,8 @@ namecheap dns list example.com --sandbox
 
 - `namecheap.domains.getList` - List all domains
 - `namecheap.domains.dns.getList` - Get DNS nameservers for a domain
+- `namecheap.domains.dns.getHosts` - Get DNS host records for a domain
+- `namecheap.domains.dns.setDefault` - Set domain to use Namecheap default nameservers
 
 ## Project Structure
 
