@@ -243,6 +243,67 @@ describe('ResponseParser', () => {
     });
   });
 
+  describe('parseDnsSetHostsResponse', () => {
+    it('should parse successful set-hosts response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.setHosts</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.dns.setHosts">
+    <DomainDNSSetHostsResult Domain="example.com" IsSuccess="true" />
+  </CommandResponse>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.456</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsSetHostsResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domain).toBe('example.com');
+      expect(result.data?.isSuccess).toBe(true);
+    });
+
+    it('should parse error response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="2019166">Domain not found</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.setHosts</RequestedCommand>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.078</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsSetHostsResponse(xml);
+
+      expect(result.status).toBe('ERROR');
+      expect(result.errors).toContain('Domain not found');
+    });
+
+    it('should handle too many records error', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="3013288">Too many records</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.setHosts</RequestedCommand>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.078</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsSetHostsResponse(xml);
+
+      expect(result.status).toBe('ERROR');
+      expect(result.errors).toContain('Too many records');
+    });
+  });
+
   describe('parseDomainCheckResponse', () => {
     it('should parse successful response with regular domain', () => {
       const xml = `<?xml version="1.0" encoding="utf-8"?>

@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { domainsListCommand, domainCheckCommand } from './commands/domains';
-import { dnsListCommand, dnsRecordsCommand, dnsSetDefaultsCommand } from './commands/dns';
+import { dnsListCommand, dnsRecordsCommand, dnsSetDefaultsCommand, dnsAddCommand, dnsRemoveCommand } from './commands/dns';
 
 const program = new Command();
 
@@ -59,5 +59,22 @@ dnsCommand
   .description('Set domain to use Namecheap default nameservers')
   .option('--sandbox', 'Use sandbox environment')
   .action(dnsSetDefaultsCommand);
+
+dnsCommand
+  .command('add <domain>')
+  .description('Add a DNS host record')
+  .requiredOption('--host <hostname>', 'Host name (e.g., @, www, mail)')
+  .requiredOption('--type <type>', 'Record type (A, AAAA, CNAME, MX, TXT, etc.)')
+  .requiredOption('--value <address>', 'Record value (IP address, hostname, etc.)')
+  .option('--ttl <seconds>', 'Time to live in seconds (60-60000)', '1799')
+  .option('--mx-pref <priority>', 'MX preference (for MX records)', '10')
+  .option('--sandbox', 'Use sandbox environment')
+  .action(dnsAddCommand);
+
+dnsCommand
+  .command('remove <domain>')
+  .description('Remove a DNS host record (interactive)')
+  .option('--sandbox', 'Use sandbox environment')
+  .action(dnsRemoveCommand);
 
 program.parse();

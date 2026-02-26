@@ -62,6 +62,11 @@ export interface DnsSetDefaultResponse {
   isSuccess: boolean;
 }
 
+export interface DnsSetHostsResponse {
+  domain: string;
+  isSuccess: boolean;
+}
+
 export interface DomainCheckResult {
   domain: string;
   available: boolean;

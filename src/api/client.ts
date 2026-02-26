@@ -1,6 +1,6 @@
 import * as https from 'https';
 import { URL } from 'url';
-import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse, DnsHostsResponse, DnsSetDefaultResponse, DomainCheckResponse } from './types';
+import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse, DnsHostsResponse, DnsSetDefaultResponse, DnsSetHostsResponse, DomainCheckResponse, HostRecord } from './types';
 import { ResponseParser } from './parser';
 
 const ENDPOINTS = {
@@ -140,5 +140,37 @@ export class NamecheapClient {
 
     const xml = await this.makeRequest(url);
     return ResponseParser.parseDomainCheckResponse(xml);
+  }
+
+  async setDnsHosts(domain: string, hosts: HostRecord[]): Promise<ApiResponse<DnsSetHostsResponse>> {
+    const parts = domain.split('.');
+
+    if (parts.length < 2) {
+      throw new Error('Invalid domain format');
+    }
+
+    const tld = parts.slice(-1)[0];
+    const sld = parts.slice(0, -1).join('.');
+
+    const params: ApiRequestParams = {
+      command: 'namecheap.domains.dns.setHosts',
+      SLD: sld,
+      TLD: tld,
+      EmailType: 'MX',
+    };
+
+    // Add numbered parameters for each host record
+    hosts.forEach((host, index) => {
+      const num = index + 1;
+      params[`HostName${num}`] = host.name;
+      params[`RecordType${num}`] = host.type;
+      params[`Address${num}`] = host.address;
+      params[`TTL${num}`] = host.ttl;
+      params[`MXPref${num}`] = host.mxPref;
+    });
+
+    const url = this.buildUrl(params);
+    const xml = await this.makeRequest(url);
+    return ResponseParser.parseDnsSetHostsResponse(xml);
   }
 }
