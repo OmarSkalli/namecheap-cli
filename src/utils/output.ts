@@ -2,6 +2,7 @@ import Table from 'cli-table3';
 import chalk from 'chalk';
 import { Domain, DnsListResponse, DnsHostsResponse, DomainCheckResult } from '../api/types';
 import { Renderer, RenderFormat } from './renderer';
+import { formatTTL } from './ttl';
 
 export type OutputFormat = 'table' | 'json';
 
@@ -73,7 +74,7 @@ export class OutputFormatter {
       type: host.type,
       value: host.address,
       priority: host.mxPref,
-      ttl: (host.ttl === '1799' || host.ttl === '1800') ? 'Automatic' : host.ttl,
+      ttl: formatTTL(host.ttl),
     }));
 
     return Renderer.render(records, {

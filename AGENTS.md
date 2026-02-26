@@ -175,6 +175,17 @@ npm run build
 
 Multi-part TLDs (co.uk, com.au) are handled by `DomainParser.parse()`. Use this utility when splitting domains into SLD/TLD for API calls.
 
+### TTL Formatting
+
+Namecheap uses `1799` or `1800` to represent "Automatic" TTL. Always use the `formatTTL()` utility from `src/utils/ttl.ts` when displaying TTL values to users:
+
+```typescript
+import { formatTTL } from '../utils/ttl';
+
+// Display TTL
+console.log(`TTL: ${formatTTL(host.ttl)}`); // Shows "Automatic" for 1799/1800
+```
+
 ### Error Handling
 
 - API errors: Check `response.status === 'ERROR'` and display `response.errors`
