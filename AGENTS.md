@@ -10,6 +10,8 @@ A TypeScript CLI tool for managing Namecheap domains and DNS via the Namecheap A
 
 - `domains.getList` - List all domains
 - `domains.dns.getList` - Get DNS nameservers for a domain
+- `domains.dns.getHosts` - Get DNS host records for a domain
+- `domains.dns.setDefault` - Set domain to use Namecheap default nameservers
 
 ## Architecture
 
@@ -203,6 +205,21 @@ Avoid `chalk.gray` - use these instead:
 3. **Domain splitting** - Some endpoints need separate SLD and TLD parameters
 4. **Pagination** - Domain list supports paging (not implemented yet)
 5. **Rate limits** - Sandbox: 20/min, Production: varies by account level
+6. **IsSuccess flag** - Some endpoints return `Status="OK"` but `IsSuccess="false"` when operation can't be completed (e.g., domain already using default nameservers)
+
+## Common Error Codes
+
+### domains.dns.setDefault Error Codes
+
+- **2019166**: Domain not found
+- **2016166**: Domain is not associated with your account
+- **2030166**: Edit permission for domain is not supported
+- **3013288**: Too many records
+- **3031510**: Error from Enom when Errorcount <> 0
+- **3050900**: Unknown error from Enom
+- **4022288**: Unable to get nameserver list
+
+When implementing commands, the API errors are automatically returned in `response.errors` array and should be displayed using `OutputFormatter.formatError()`.
 
 ## Future Enhancements
 

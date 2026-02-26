@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { domainsListCommand } from './commands/domains';
-import { dnsListCommand, dnsRecordsCommand } from './commands/dns';
+import { dnsListCommand, dnsRecordsCommand, dnsSetDefaultsCommand } from './commands/dns';
 
 const program = new Command();
 
@@ -46,5 +46,11 @@ dnsCommand
   .option('--table', 'Display records in table format')
   .option('--sandbox', 'Use sandbox environment')
   .action(dnsRecordsCommand);
+
+dnsCommand
+  .command('set-defaults <domain>')
+  .description('Set domain to use Namecheap default nameservers')
+  .option('--sandbox', 'Use sandbox environment')
+  .action(dnsSetDefaultsCommand);
 
 program.parse();

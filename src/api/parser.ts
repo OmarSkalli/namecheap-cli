@@ -5,6 +5,7 @@ import {
   DomainsListResponse,
   DnsListResponse,
   DnsHostsResponse,
+  DnsSetDefaultResponse,
   HostRecord,
 } from './types';
 
@@ -163,6 +164,32 @@ export class ResponseParser {
         domain: result['@_Domain'],
         isUsingOurDNS: result['@_IsUsingOurDNS'] === 'true',
         hosts,
+      },
+      executionTime: apiResponse.ExecutionTime,
+      server: apiResponse.Server,
+    };
+  }
+
+  static parseDnsSetDefaultResponse(xml: string): ApiResponse<DnsSetDefaultResponse> {
+    const parsed = this.parseXml(xml);
+    const apiResponse = parsed.ApiResponse;
+    const errors = this.extractErrors(parsed);
+
+    if (errors.length > 0) {
+      return {
+        status: 'ERROR',
+        errors,
+      };
+    }
+
+    const commandResponse = apiResponse.CommandResponse;
+    const result = commandResponse.DomainDNSSetDefaultResult;
+
+    return {
+      status: 'OK',
+      data: {
+        domain: result['@_Domain'],
+        isSuccess: result['@_IsSuccess'] === 'true',
       },
       executionTime: apiResponse.ExecutionTime,
       server: apiResponse.Server,

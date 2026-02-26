@@ -57,6 +57,11 @@ export interface DnsHostsResponse {
   hosts: HostRecord[];
 }
 
+export interface DnsSetDefaultResponse {
+  domain: string;
+  isSuccess: boolean;
+}
+
 export interface ApiRequestParams {
   command: string;
   [key: string]: string | number | boolean;

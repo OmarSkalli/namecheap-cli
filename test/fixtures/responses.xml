@@ -59,3 +59,18 @@
     <ExecutionTime>0.189</ExecutionTime>
   </ApiResponse>
 </DnsHostsSuccess>
+
+<!-- domains.dns.setDefault success response -->
+<DnsSetDefaultSuccess>
+  <ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+    <Errors />
+    <Warnings />
+    <RequestedCommand>namecheap.domains.dns.setDefault</RequestedCommand>
+    <CommandResponse Type="namecheap.domains.dns.setDefault">
+      <DomainDNSSetDefaultResult Domain="example.com" IsSuccess="true" />
+    </CommandResponse>
+    <Server>WEB1</Server>
+    <GMTTimeDifference>--5:00</GMTTimeDifference>
+    <ExecutionTime>0.234</ExecutionTime>
+  </ApiResponse>
+</DnsSetDefaultSuccess>

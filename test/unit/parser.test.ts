@@ -200,4 +200,46 @@ describe('ResponseParser', () => {
       expect(result.errors).toContain('Domain name not found');
     });
   });
+
+  describe('parseDnsSetDefaultResponse', () => {
+    it('should parse successful set-default response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.setDefault</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.dns.setDefault">
+    <DomainDNSSetDefaultResult Domain="example.com" IsSuccess="true" />
+  </CommandResponse>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.234</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsSetDefaultResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domain).toBe('example.com');
+      expect(result.data?.isSuccess).toBe(true);
+    });
+
+    it('should parse error response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="2011204">Domain not found</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.setDefault</RequestedCommand>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.078</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsSetDefaultResponse(xml);
+
+      expect(result.status).toBe('ERROR');
+      expect(result.errors).toContain('Domain not found');
+    });
+  });
 });
