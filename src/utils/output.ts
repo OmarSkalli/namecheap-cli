@@ -1,6 +1,7 @@
 import Table from 'cli-table3';
 import chalk from 'chalk';
-import { Domain, DnsListResponse } from '../api/types';
+import { Domain, DnsListResponse, DnsHostsResponse } from '../api/types';
+import { Renderer, RenderFormat } from './renderer';
 
 export type OutputFormat = 'table' | 'json';
 
@@ -58,6 +59,61 @@ export class OutputFormatter {
     }
 
     return output.join('\n');
+  }
+
+  static formatDnsHosts(data: DnsHostsResponse, format: OutputFormat = 'table', raw: boolean = false): string {
+    const renderFormat: RenderFormat = format === 'json' ? 'json' : (raw ? 'raw' : 'table');
+
+    const title = `Found ${data.hosts.length} DNS record${data.hosts.length !== 1 ? 's' : ''} for ${chalk.cyan(data.domain)}:`;
+
+    // Transform hosts data to include formatted record type
+    const records = data.hosts.map(host => ({
+      recordType: `${host.type} Record`,
+      hostname: host.name === '@' ? '@' : host.name,
+      type: host.type,
+      value: host.address,
+      priority: host.mxPref,
+      ttl: (host.ttl === '1799' || host.ttl === '1800') ? 'Automatic' : host.ttl,
+    }));
+
+    return Renderer.render(records, {
+      format: renderFormat,
+      title: renderFormat !== 'json' ? title : undefined,
+      fields: [
+        {
+          label: renderFormat === 'raw' ? 'Type:' : 'Type',
+          key: 'recordType',
+          format: (v) => renderFormat === 'raw' ? chalk.bold(chalk.cyan(v)) : v,
+          maxWidth: 15,
+        },
+        {
+          label: renderFormat === 'raw' ? 'Hostname:' : 'Hostname',
+          key: 'hostname',
+          maxWidth: 20,
+        },
+        {
+          label: renderFormat === 'raw' ? 'Value:' : 'Value',
+          key: 'value',
+          maxWidth: 50,
+        },
+        {
+          label: renderFormat === 'raw' ? 'Priority:' : 'Priority',
+          key: 'priority',
+          hideIfEmpty: true,
+          format: (v, item) => {
+            // Only show for MX records
+            if (item && item.type !== 'MX') return '-';
+            return v;
+          },
+          maxWidth: 10,
+        },
+        {
+          label: renderFormat === 'raw' ? 'TTL:' : 'TTL',
+          key: 'ttl',
+          maxWidth: 12,
+        },
+      ],
+    });
   }
 
   static formatError(error: string | string[]): string {

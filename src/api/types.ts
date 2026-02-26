@@ -42,6 +42,21 @@ export interface DnsListResponse {
   nameservers: string[];
 }
 
+export interface HostRecord {
+  hostId: string;
+  name: string;
+  type: string;
+  address: string;
+  mxPref: string;
+  ttl: string;
+}
+
+export interface DnsHostsResponse {
+  domain: string;
+  isUsingOurDNS: boolean;
+  hosts: HostRecord[];
+}
+
 export interface ApiRequestParams {
   command: string;
   [key: string]: string | number | boolean;

@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { domainsListCommand } from './commands/domains';
-import { dnsListCommand } from './commands/dns';
+import { dnsListCommand, dnsRecordsCommand } from './commands/dns';
 
 const program = new Command();
 
@@ -38,5 +38,13 @@ dnsCommand
   .option('-o, --output <format>', 'Output format (table|json)', 'table')
   .option('--sandbox', 'Use sandbox environment')
   .action(dnsListCommand);
+
+dnsCommand
+  .command('records <domain>')
+  .description('List DNS host records for a domain (A, CNAME, MX, etc.)')
+  .option('-o, --output <format>', 'Output format (json)', 'table')
+  .option('--table', 'Display records in table format')
+  .option('--sandbox', 'Use sandbox environment')
+  .action(dnsRecordsCommand);
 
 program.parse();

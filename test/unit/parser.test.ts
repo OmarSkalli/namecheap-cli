@@ -143,4 +143,61 @@ describe('ResponseParser', () => {
       expect(result.errors).toContain('Domain name not found');
     });
   });
+
+  describe('parseDnsHostsResponse', () => {
+    it('should parse successful DNS hosts response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.getHosts</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.dns.getHosts">
+    <DomainDNSGetHostsResult Domain="example.com" IsUsingOurDNS="true">
+      <host HostId="1" Name="@" Type="A" Address="192.0.2.1" MXPref="10" TTL="1800" />
+      <host HostId="2" Name="www" Type="CNAME" Address="example.com." MXPref="10" TTL="1800" />
+      <host HostId="3" Name="mail" Type="MX" Address="mail.example.com." MXPref="10" TTL="1800" />
+    </DomainDNSGetHostsResult>
+  </CommandResponse>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.189</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsHostsResponse(xml);
+
+      expect(result.status).toBe('OK');
+      expect(result.data?.domain).toBe('example.com');
+      expect(result.data?.isUsingOurDNS).toBe(true);
+      expect(result.data?.hosts).toHaveLength(3);
+      expect(result.data?.hosts[0]).toEqual({
+        hostId: '1',
+        name: '@',
+        type: 'A',
+        address: '192.0.2.1',
+        mxPref: '10',
+        ttl: '1800',
+      });
+      expect(result.data?.hosts[1].type).toBe('CNAME');
+      expect(result.data?.hosts[2].type).toBe('MX');
+    });
+
+    it('should parse error response', () => {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="2011166">Domain name not found</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.getHosts</RequestedCommand>
+  <Server>WEB1</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.078</ExecutionTime>
+</ApiResponse>`;
+
+      const result = ResponseParser.parseDnsHostsResponse(xml);
+
+      expect(result.status).toBe('ERROR');
+      expect(result.errors).toContain('Domain name not found');
+    });
+  });
 });

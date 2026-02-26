@@ -1,6 +1,6 @@
 import * as https from 'https';
 import { URL } from 'url';
-import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse } from './types';
+import { NamecheapConfig, ApiRequestParams, ApiResponse, DomainsListResponse, DnsListResponse, DnsHostsResponse } from './types';
 import { ResponseParser } from './parser';
 
 const ENDPOINTS = {
@@ -90,5 +90,25 @@ export class NamecheapClient {
 
     const xml = await this.makeRequest(url);
     return ResponseParser.parseDnsListResponse(xml);
+  }
+
+  async getDnsHosts(domain: string): Promise<ApiResponse<DnsHostsResponse>> {
+    const parts = domain.split('.');
+
+    if (parts.length < 2) {
+      throw new Error('Invalid domain format');
+    }
+
+    const tld = parts.slice(-1)[0];
+    const sld = parts.slice(0, -1).join('.');
+
+    const url = this.buildUrl({
+      command: 'namecheap.domains.dns.getHosts',
+      SLD: sld,
+      TLD: tld,
+    });
+
+    const xml = await this.makeRequest(url);
+    return ResponseParser.parseDnsHostsResponse(xml);
   }
 }

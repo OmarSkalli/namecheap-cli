@@ -4,6 +4,8 @@ import {
   Domain,
   DomainsListResponse,
   DnsListResponse,
+  DnsHostsResponse,
+  HostRecord,
 } from './types';
 
 const parser = new XMLParser({
@@ -118,6 +120,49 @@ export class ResponseParser {
         domain: result['@_Domain'],
         isUsingOurDNS: result['@_IsUsingOurDNS'] === 'true',
         nameservers,
+      },
+      executionTime: apiResponse.ExecutionTime,
+      server: apiResponse.Server,
+    };
+  }
+
+  static parseDnsHostsResponse(xml: string): ApiResponse<DnsHostsResponse> {
+    const parsed = this.parseXml(xml);
+    const apiResponse = parsed.ApiResponse;
+    const errors = this.extractErrors(parsed);
+
+    if (errors.length > 0) {
+      return {
+        status: 'ERROR',
+        errors,
+      };
+    }
+
+    const commandResponse = apiResponse.CommandResponse;
+    const result = commandResponse.DomainDNSGetHostsResult;
+
+    const hosts: HostRecord[] = [];
+    if (result.host) {
+      const hostData = Array.isArray(result.host) ? result.host : [result.host];
+
+      for (const h of hostData) {
+        hosts.push({
+          hostId: h['@_HostId'],
+          name: h['@_Name'],
+          type: h['@_Type'],
+          address: h['@_Address'],
+          mxPref: h['@_MXPref'] || '10',
+          ttl: h['@_TTL'],
+        });
+      }
+    }
+
+    return {
+      status: 'OK',
+      data: {
+        domain: result['@_Domain'],
+        isUsingOurDNS: result['@_IsUsingOurDNS'] === 'true',
+        hosts,
       },
       executionTime: apiResponse.ExecutionTime,
       server: apiResponse.Server,

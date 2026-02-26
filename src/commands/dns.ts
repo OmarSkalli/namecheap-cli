@@ -38,3 +38,46 @@ export async function dnsListCommand(
     process.exit(1);
   }
 }
+
+export async function dnsRecordsCommand(
+  domain: string,
+  options: { output?: OutputFormat; sandbox?: boolean; table?: boolean }
+): Promise<void> {
+  try {
+    if (!DomainParser.validate(domain)) {
+      console.error(OutputFormatter.formatError(`Invalid domain format: ${domain}`));
+      process.exit(1);
+    }
+
+    const config = ConfigManager.loadConfig();
+    const client = new NamecheapClient(config, options.sandbox || false);
+    const response = await client.getDnsHosts(domain);
+
+    if (response.status === 'ERROR') {
+      console.error(OutputFormatter.formatError(response.errors || ['Unknown error']));
+      process.exit(1);
+    }
+
+    if (!response.data) {
+      console.error(OutputFormatter.formatError('No data received from API'));
+      process.exit(1);
+    }
+
+    // Default to raw format, use table if --table flag is provided
+    const useRaw = !options.table;
+
+    const output = OutputFormatter.formatDnsHosts(
+      response.data,
+      options.output || 'table',
+      useRaw
+    );
+    console.log(output);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(OutputFormatter.formatError(error.message));
+    } else {
+      console.error(OutputFormatter.formatError('An unknown error occurred'));
+    }
+    process.exit(1);
+  }
+}
